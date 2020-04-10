@@ -36,10 +36,10 @@
 //
 //*****************************************************************************
 
-#include <HAL/LcdDriver/Crystalfontz128x128_ST7735.h>
-#include <HAL/LcdDriver/HAL_MSP_EXP432P401R_Crystalfontz128x128_ST7735.h>
 #include <ti/grlib/grlib.h>
+#include "Crystalfontz128x128_ST7735.h"
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+#include "HAL_MSP_EXP432P401R_Crystalfontz128x128_ST7735.h"
 #include <stdint.h>
 
 uint8_t Lcd_Orientation;

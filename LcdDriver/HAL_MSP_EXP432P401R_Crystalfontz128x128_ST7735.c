@@ -37,7 +37,7 @@
 //
 //*****************************************************************************
 
-#include <HAL/LcdDriver/HAL_MSP_EXP432P401R_Crystalfontz128x128_ST7735.h>
+#include "HAL_MSP_EXP432P401R_Crystalfontz128x128_ST7735.h"
 #include <ti/grlib/grlib.h>
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 #include <stdint.h>
