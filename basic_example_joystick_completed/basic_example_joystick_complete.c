@@ -4,7 +4,7 @@
 #include "graphics_HAL.h"
 
 
-#define LEFT_THRESHOLD  0x0
+#define LEFT_THRESHOLD  1500
 
 
 

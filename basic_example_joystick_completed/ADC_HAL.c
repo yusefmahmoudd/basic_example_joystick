@@ -22,7 +22,7 @@ void initADC() {
     // This configures the ADC to store output results
     // in ADC_MEM0 up to ADC_MEM1. Each conversion will
     // thus use two channels.
-    ADC14_configureMultiSequenceMode(ADC_MEM0, ADC_MEM0, true);
+    ADC14_configureMultiSequenceMode(ADC_MEM0, ADC_MEM1, true);
 
     // This configures the ADC in manual conversion mode
     // Software will start each conversion.
@@ -58,16 +58,20 @@ void initJoyStick() {
     // should be used in place of 0 as the last argument?
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P6,
                                                GPIO_PIN0,
-                                               0);
-
-    // TODO: Configure the buffer location after ADC_MEM0 to store the result from
-    // input channel related to Joystick Y, in non-differential input mode
-    // (non-differential means: only a single input pin)
-    // The reference for Vref- and Vref+ are VSS and VCC respectively
+                                               GPIO_TERTIARY_MODULE_FUNCTION);
 
 
+    ADC14_configureConversionMemory(ADC_MEM1,
+                                   ADC_VREFPOS_AVCC_VREFNEG_VSS,
+                                   ADC_INPUT_A9,                 // joystick y
+                                   ADC_NONDIFFERENTIAL_INPUTS);
 
-    // TODO: Make sure the pin that holds the Joystick Y value is going to be used as an analog input
+    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P4,
+                                               GPIO_PIN4,
+                                               GPIO_TERTIARY_MODULE_FUNCTION);
+
+
+
 
 }
 
@@ -76,5 +80,5 @@ void getSampleJoyStick(unsigned *X, unsigned *Y) {
     *X = ADC14_getResult(ADC_MEM0);
 
     // TODO: Read the Y channel
-
+    *Y = ADC14_getResult(ADC_MEM1);
 }
