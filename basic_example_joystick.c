@@ -1,6 +1,5 @@
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 
-#include "ADC_HAL.h"
 #include "graphics_HAL.h"
 
 
@@ -11,6 +10,11 @@
 // This function initializes all the peripherals except graphics
 void initialize();
 void ModifyLEDColor(bool leftButtonWasPushed, bool rightButtonWasPushed);
+
+void initADC();
+void startADC();
+void initJoyStick();
+void getSampleJoyStick(unsigned *X, unsigned *Y);
 
 int main(void)
 {
@@ -37,7 +41,6 @@ int main(void)
         }
 
         MoveCircle(&g_sContext, joyStickPushedtoLeft,joyStickPushedtoRight);
-
      }
 }
 
@@ -49,21 +52,72 @@ void initialize()
     // stop the watchdog timer
     WDT_A_hold(WDT_A_BASE);
 
-    // Initialize the timers needed for debouncing
-    Timer32_initModule(TIMER32_0_BASE, // There are two timers, we are using the one with the index 0
-                       TIMER32_PRESCALER_1, // The prescaler value is 1; The clock is not divided before feeding the counter
-                       TIMER32_32BIT, // The counter is used in 32-bit mode; the alternative is 16-bit mode
-                       TIMER32_PERIODIC_MODE); //This options is irrelevant for a one-shot timer
-
-    Timer32_initModule(TIMER32_1_BASE, // There are two timers, we are using the one with the index 1
-                       TIMER32_PRESCALER_1, // The prescaler value is 1; The clock is not divided before feeding the counter
-                       TIMER32_32BIT, // The counter is used in 32-bit mode; the alternative is 16-bit mode
-                       TIMER32_PERIODIC_MODE); //This options is irrelevant for a one-shot timer
-
-
     initADC();
     initJoyStick();
     startADC();
 }
 
+
+// Initializing the ADC which resides on SoC
+void initADC() {
+    ADC14_enableModule();
+
+    // This sets the conversion clock to 3MHz
+    ADC14_initModule(ADC_CLOCKSOURCE_SYSOSC,
+                     ADC_PREDIVIDER_1,
+                     ADC_DIVIDER_1,
+                      0
+                     );
+
+    // This configures the ADC to store output results
+    // in ADC_MEM0 for joystick X.
+    // Todo: if we want to add joystick Y, then, we have to use more memory locations
+    ADC14_configureMultiSequenceMode(ADC_MEM0, ADC_MEM0, true);
+
+    // This configures the ADC in manual conversion mode
+    // Software will start each conversion.
+    ADC14_enableSampleTimer(ADC_AUTOMATIC_ITERATION);
+}
+
+
+void startADC() {
+   // Starts the ADC with the first conversion
+   // in repeat-mode, subsequent conversions run automatically
+   ADC14_enableConversion();
+   ADC14_toggleConversionTrigger();
+}
+
+
+// Interfacing the Joystick with ADC (making the proper connections in software)
+void initJoyStick() {
+
+    // This configures ADC_MEM0 to store the result from
+    // input channel A15 (Joystick X), in non-differential input mode
+    // (non-differential means: only a single input pin)
+    // The reference for Vref- and Vref+ are VSS and VCC respectively
+    ADC14_configureConversionMemory(ADC_MEM0,
+                                  ADC_VREFPOS_AVCC_VREFNEG_VSS,
+                                  ADC_INPUT_A15,                 // joystick X
+                                  ADC_NONDIFFERENTIAL_INPUTS);
+
+    // This selects the GPIO as analog input
+    // A15 is multiplexed on GPIO port P6 pin PIN0
+    // TODO: which one of GPIO_PRIMARY_MODULE_FUNCTION, or
+    //                    GPIO_SECONDARY_MODULE_FUNCTION, or
+    //                    GPIO_TERTIARY_MODULE_FUNCTION
+    // should be used in place of 0 as the last argument?
+    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P6,
+                                               GPIO_PIN0,
+                                               GPIO_TERTIARY_MODULE_FUNCTION);
+
+    // TODO: add joystick Y
+
+}
+
+void getSampleJoyStick(unsigned *X, unsigned *Y) {
+    // ADC runs in continuous mode, we just read the conversion buffers
+    *X = ADC14_getResult(ADC_MEM0);
+
+    // TODO: Read the Y channel
+}
 
