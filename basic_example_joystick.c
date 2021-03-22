@@ -62,7 +62,6 @@ void initialize()
 void initADC() {
     ADC14_enableModule();
 
-    // This sets the conversion clock to 3MHz
     ADC14_initModule(ADC_CLOCKSOURCE_SYSOSC,
                      ADC_PREDIVIDER_1,
                      ADC_DIVIDER_1,
