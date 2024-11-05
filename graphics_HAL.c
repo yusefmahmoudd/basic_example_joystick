@@ -1,9 +1,4 @@
-/*
- * graphics_HAL.c
- *
- *  Created on: Oct 18, 2018
- *      Author: Leyla
- */
+
 
 #include <ti/grlib/grlib.h>
 #include "LcdDriver/Crystalfontz128x128_ST7735.h"
